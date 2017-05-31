@@ -1,0 +1,20 @@
+{
+  "name": "pagedraw",
+  "version": "0.0.1",
+  "description": "Pagedraw command line tool",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "commander": "2.9.0",
+    "firebase": "4.0.0",
+    "lodash": "4.17.4",
+    "netrc": "0.1.4",
+    "open": "0.0.5",
+    "request": "2.61.0",
+    "secure-random-string": "1.0.0"
+  },
+  "author": "Pagedraw",
+  "license": "ISC"
+}
