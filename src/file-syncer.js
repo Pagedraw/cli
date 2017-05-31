@@ -4,11 +4,12 @@ var fs = require('fs');
 var url = require('url');
 var _ = require('lodash');
 
-const COMPILE_SERVER = 'http://happy-unicorns.herokuapp.com';
+const COMPILE_SERVER = process.env['PAGEDRAW_COMPILE_SERVER'] || 'http://happy-unicorns.herokuapp.com';
 const COMPILE_ENDPOINT = url.resolve(COMPILE_SERVER, 'v1/compile');
+const DOCSERVER = process.env['PAGEDRAW_DOCSERVER'] || 'https://pagedraw.firebaseio.com/';
 
 firebase.initializeApp({
-    databaseURL: 'https://pagedraw.firebaseio.com/'
+    databaseURL: DOCSERVER
 });
 
 

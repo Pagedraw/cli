@@ -2,9 +2,9 @@
   "name": "pagedraw",
   "version": "0.0.1",
   "description": "Pagedraw command line tool",
-  "main": "src/index.js",
+  "main": "src/pagedraw.js",
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node src/pagedraw.js"
   },
   "dependencies": {
     "commander": "2.9.0",

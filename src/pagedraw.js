@@ -2,9 +2,9 @@
 
 var program = require('commander');
 var syncPagedrawDoc = require('./file-syncer');
-var pdAuth = require('./auth');
 var pdAPI = require('./api');
 var pdConfig = require('./config');
+var utils = require('./utils');
 var _ = require('lodash');
 
 program
@@ -16,7 +16,11 @@ program
   .description('Authenticate to gain access to the Pagedraw API.')
   .action(function(env, options) {
 	console.log('Logging into Pagedraw');
-	pdAuth.pagedrawAPIAuthenticate();
+	pdAPI.pagedrawAPIAuthenticate((err, credentials) => {
+	    if (err)
+	        utils.abort(err.message);
+	    console.log('Authentication succesfull.');
+	});
   });
 
 program
@@ -25,22 +29,19 @@ program
 	.action(function(env, options) {
 		console.log('Starting Pagedraw sync server.');
         pdConfig.findPagedrawConfig((err, dir, pd_config) => {
-            if (err) {
-                throw err;
-            }
-
-            console.log('Found pagedraw.json.');
+            if (err)
+                utils.abort(err.message);
 
             // Change our CWD into the same as the pagedraw config file
             process.chdir(dir);
 
             if (_.isEmpty(pd_config.app))
-                throw new Error('pagedraw.json must contain an "app" field.');
+                utils.abort('pagedraw.json must contain an "app" field.');
 
             // Read all docs to be synced from the config file and watches changes on all of them
             pdAPI.getApp(pd_config.app, (err, resp, body) => {
                 if (err || resp.statusCode != 200)
-                    throw new Error('Unable to fetch data from Pagedraw API');
+                    utils.abort('Unable to fetch data from Pagedraw API');
 
                 let app = JSON.parse(body)[0];
                 console.log(`Syncing docs from app ${app.name}`);
