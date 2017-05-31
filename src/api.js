@@ -9,6 +9,7 @@ var _ = require('lodash');
 const METASERVER = process.env['PAGEDRAW_METASERVER'] || 'https://pagedraw.io/';
 const OAUTH_URL = url.resolve(METASERVER, 'users/auth/google_oauth2');
 const TOKEN_SIGN_IN_URL = url.resolve(METASERVER, 'users/sign_in' );
+const API_VERSION = 'v1'
 const netrc_entry = 'pagedraw.io';
 
 var cachedCredentials = undefined;
@@ -65,7 +66,12 @@ const authedGet = (endpoint) => {
     return endpoint + `?email=${credentials().email}&auth_token=${credentials().auth_token}`;
 }
 
-module.exports.getApp = getApp = (app_id, callback) => {
-    const endpoint = url.resolve(METASERVER, `apps/${app_id}.json`);
+module.exports.getApp = getApp = (app_name, callback) => {
+    const endpoint = url.resolve(METASERVER, `api/${API_VERSION}/cli/apps/${app_name}`);
+    request.get(authedGet(endpoint), callback);
+};
+
+module.exports.compileFromPageId = compileFromPageId = (page_id, callback) => {
+    const endpoint = url.resolve(METASERVER, `api/${API_VERSION}/cli/compile_from_page_id/${page_id}`);
     request.get(authedGet(endpoint), callback);
 };
