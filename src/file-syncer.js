@@ -27,7 +27,7 @@ const handleDocChange = (doc) => {
     const requiredFields = ['file_path', 'export_lang', 'blocks'];
     for (var field of requiredFields) {
         if (_.isEmpty(doc[field])) {
-            console.log(`Sync error. Doc changed but no ${field} present.`);
+            console.log(`Not syncing. Doc changed but no ${field} present.`);
             return;
         }
     }
@@ -35,8 +35,8 @@ const handleDocChange = (doc) => {
     // Sends the firebase doc to the compile server...
     request.post({uri: COMPILE_ENDPOINT, json: {pd_doc: doc}}, (err, resp, body) => {
         if (err) {
-            console.log('Error' + err);
-            return;
+            console.log('Sync error. Compile server did not respond correctly.');
+            throw err;
         }
 
         // ... and gets back the compiled code, writing it to the

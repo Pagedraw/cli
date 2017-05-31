@@ -15,13 +15,14 @@ module.exports.credentials = credentials = () => {
     if (_.isEmpty(cachedCredentials))
         cachedCredentials = getCredentials();
 
-    if (_.isEmpty(cachedCredentials.email) || _.isEmpty(cachedCredentials.auth_token))
-        throw new Error('Unable to ensure Pagedraw credentials exist');
     return cachedCredentials;
 };
 
 const getCredentials = () => {
     var netrcCreds = netrc()[netrc_entry];
+    if (_.isEmpty(netrcCreds) || _.isEmpty(netrcCreds.login) || _.isEmpty(netrcCreds.password))
+        throw new Error('User is not authenticated to access the Pagedraw API. Please run pagedraw login');
+
     return { email: netrcCreds.login, auth_token: netrcCreds.password };
 };
 
