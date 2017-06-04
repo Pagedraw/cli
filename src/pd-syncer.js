@@ -3,16 +3,16 @@ var firebase = require('firebase');
 var pdAPI = require('./api');
 var fs = require('fs');
 var url = require('url');
+var utils = require('./utils');
 var _ = require('lodash');
 
 const METASERVER = process.env['PAGEDRAW_METASERVER'] || 'https://pagedraw.io/';
 const DOCSERVER = process.env['PAGEDRAW_DOCSERVER'] || 'https://pagedraw.firebaseio.com/';
 
 const handleCompileResponse = (callback) => { return (err, resp, body) => {
-    if (err) {
-        console.error('Error. Compile server did not respond correctly.');
-        throw err;
-    }
+    if (err || resp.statusCode != 200)
+        utils.abort('Error. Compile server did not respond correctly.');
+
     var json;
     try { json = JSON.parse(body); }
     catch (err) { throw new Error('Pagedraw API returned bad JSON.'); }

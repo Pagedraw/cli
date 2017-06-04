@@ -39,8 +39,11 @@ program
 
             // Read all docs to be synced from the config file and pull changes from all of them
             pdAPI.getApp(pd_config.app, (err, resp, body) => {
+                if (resp.statusCode == 404)
+                    utils.abort(`Unable to fetch data from Pagedraw API. Are you sure you have access to the app ${pd_config.app}? Try re-running pagedraw login`);
+
                 if (err || resp.statusCode != 200)
-                    utils.abort('Unable to fetch data from Pagedraw API');
+                    utils.abort('Unable to fetch data from the Pagedraw API. Are you connected to the internet?');
 
                 var app;
                 try { app = JSON.parse(body); }
