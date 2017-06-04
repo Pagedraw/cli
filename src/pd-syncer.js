@@ -6,23 +6,7 @@ var url = require('url');
 var _ = require('lodash');
 
 const METASERVER = process.env['PAGEDRAW_METASERVER'] || 'https://pagedraw.io/';
-const COMPILE_ENDPOINT = url.resolve(METASERVER, 'api/v1/cli/compile');
 const DOCSERVER = process.env['PAGEDRAW_DOCSERVER'] || 'https://pagedraw.firebaseio.com/';
-
-firebase.initializeApp({
-    databaseURL: DOCSERVER
-});
-
-
-// Watches a doc on Firebase and calls callback on any change
-const watchDoc = (docserver_id, callback) => {
-    const ref = firebase.database().ref(`pages/${docserver_id}`);
-    const watch_id = ref.on('value', (page) => {
-        callback(JSON.parse(page.val()));
-    });
-    const unsubscribe_fn = () => { ref.off('value', watch_id) };
-    return unsubscribe_fn;
-};
 
 const handleCompileResponse = (callback) => { return (err, resp, body) => {
     if (err) {
@@ -47,6 +31,24 @@ const handleCompileResponse = (callback) => { return (err, resp, body) => {
     });
 }};
 
+/*
+ * TODO: initial code for pagedraw sync
+
+const COMPILE_ENDPOINT = url.resolve(METASERVER, 'api/v1/cli/compile');
+firebase.initializeApp({
+    databaseURL: DOCSERVER
+});
+
+// Watches a doc on Firebase and calls callback on any change
+const watchDoc = (docserver_id, callback) => {
+    const ref = firebase.database().ref(`pages/${docserver_id}`);
+    const watch_id = ref.on('value', (page) => {
+        callback(JSON.parse(page.val()));
+    });
+    const unsubscribe_fn = () => { ref.off('value', watch_id) };
+    return unsubscribe_fn;
+};
+
 // Triggers on every database doc change
 const handleDocChange = (doc) => {
     const requiredFields = ['file_path', 'export_lang', 'blocks'];
@@ -67,6 +69,7 @@ const handleDocChange = (doc) => {
 module.exports.syncPagedrawDoc = syncPagedrawDoc = (doc) => {
     watchDoc(doc.docserver_id, handleDocChange);
 };
+*/
 
 module.exports.pullPagedrawDoc = pullPagedrawDoc = (doc, callback) => {
     pdAPI.compileFromPageId(doc.id, handleCompileResponse(callback));
