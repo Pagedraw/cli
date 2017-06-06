@@ -1,6 +1,7 @@
 # Pagedraw CLI
 
-![Pagedraw logo](https://www.dropbox.com/s/cahw8tinfjjqa8l/logo_hi_res.png?dl=0)
+<img src="https://ucarecdn.com/dd0f9a9d-ab86-4ce4-a884-62a1ac769c2e/favicon.png" alt="Pagedraw logo" width="150" />
+
 
 To install run
 
