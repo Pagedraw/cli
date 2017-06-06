@@ -19,7 +19,7 @@ program
     pdAPI.pagedrawAPIAuthenticate((err, credentials) => {
         if (err)
             utils.abort(err.message);
-        console.log('Authentication succesfull.');
+        console.log('Authentication successful.');
     });
   });
 

@@ -8,8 +8,8 @@ var _ = require('lodash');
 
 const METASERVER = process.env['PAGEDRAW_METASERVER'] || 'https://pagedraw.io/';
 const OAUTH_URL = url.resolve(METASERVER, 'users/auth/google_oauth2');
-const TOKEN_SIGN_IN_URL = url.resolve(METASERVER, 'users/sign_in' );
 const API_VERSION = 'v1'
+const CLI_API_BASE = url.resolve(METASERVER, `api/${API_VERSION}/cli/`);
 const netrc_entry = 'pagedraw.io';
 
 var cachedCredentials = undefined;
@@ -45,18 +45,21 @@ module.exports.pagedrawAPIAuthenticate = (callback) => {
 
     // Open browser passing it the local token, asking user to authenticate
     // Upon authentication, server will associate an auth_token to our local_token
-    open(`${OAUTH_URL}?local_token=${local_token}`);
+    const signin_url = url.resolve(METASERVER, `users/auth/google_oauth2?local_token=${local_token}`);
+    open(signin_url);
 
-    console.log('Waiting for user to authenticate...');
+    console.log('Your browser has been open to visit:');
+    console.log('    ' + signin_url);
+    console.log('Waiting for authentication...');
 
     // Poll metaserver for the auth_token associated with local_token
-    watchPage(`${TOKEN_SIGN_IN_URL}?local_token=${local_token}`, (body) => {
+    const auth_endpoint = url.resolve(CLI_API_BASE, 'authenticate');
+    watchPage(`${auth_endpoint}?local_token=${local_token}`, (body) => {
         // Write the auth_token to ~/.netrc
         var myNetrc = netrc();
         myNetrc[netrc_entry] = { login: body.email, password: body.auth_token };
         netrc.save(myNetrc);
 
-        console.log('Authentication succesful.');
         callback(null, credentials());
 
     }, () => { callback(new Error('Authentication timed out.')); });
@@ -67,11 +70,9 @@ const authedGet = (endpoint) => {
 }
 
 module.exports.getApp = getApp = (app_name, callback) => {
-    const endpoint = url.resolve(METASERVER, `api/${API_VERSION}/cli/apps/${app_name}`);
-    request.get(authedGet(endpoint), callback);
+    request.get(authedGet(url.resolve(CLI_API_BASE, `apps/${app_name}`)), callback);
 };
 
 module.exports.compileFromPageId = compileFromPageId = (page_id, callback) => {
-    const endpoint = url.resolve(METASERVER, `api/${API_VERSION}/cli/compile_from_page_id/${page_id}`);
-    request.get(authedGet(endpoint), callback);
+    request.get(authedGet(url.resolve(CLI_API_BASE, `compile_from_page_id/${page_id}`)), callback);
 };
