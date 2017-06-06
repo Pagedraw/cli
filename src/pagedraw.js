@@ -25,7 +25,7 @@ program
 
 program
     .command('pull')
-    .description('Compile remote Pagedraw docs and pulls them into your git repository, into the path specified by the doc\'s file_path.')
+    .description('Compile remote Pagedraw docs and pulls them into your local file system, in the path specified by the doc\'s file_path.')
     .action(function(env, options) {
         pdConfig.findPagedrawConfig((err, dir, pd_config) => {
             if (err)

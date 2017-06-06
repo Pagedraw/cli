@@ -1,10 +1,11 @@
 {
-  "name": "pagedraw",
+  "name": "pagedraw-cli",
   "version": "0.0.1",
   "description": "Pagedraw command line tool",
   "main": "src/pagedraw.js",
-  "scripts": {
-    "start": "node src/pagedraw.js"
+  "repository": "https://github.com/Pagedraw/cli",
+  "bin": {
+    "pagedraw": "src/pagedraw.js"
   },
   "dependencies": {
     "commander": "2.9.0",
