@@ -1,13 +1,9 @@
 var request = require('request');
-var firebase = require('firebase');
 var pdAPI = require('./api');
 var fs = require('fs');
 var url = require('url');
 var utils = require('./utils');
 var _ = require('lodash');
-
-const METASERVER = process.env['PAGEDRAW_METASERVER'] || 'https://pagedraw.io/';
-const DOCSERVER = process.env['PAGEDRAW_DOCSERVER'] || 'https://pagedraw.firebaseio.com/';
 
 const handleCompileResponse = (callback) => { return (err, resp, body) => {
     if (err || resp.statusCode != 200)
@@ -31,24 +27,6 @@ const handleCompileResponse = (callback) => { return (err, resp, body) => {
     });
 }};
 
-/*
- * TODO: initial code for pagedraw sync
-
-const COMPILE_ENDPOINT = url.resolve(METASERVER, 'api/v1/cli/compile');
-firebase.initializeApp({
-    databaseURL: DOCSERVER
-});
-
-// Watches a doc on Firebase and calls callback on any change
-const watchDoc = (docserver_id, callback) => {
-    const ref = firebase.database().ref(`pages/${docserver_id}`);
-    const watch_id = ref.on('value', (page) => {
-        callback(JSON.parse(page.val()));
-    });
-    const unsubscribe_fn = () => { ref.off('value', watch_id) };
-    return unsubscribe_fn;
-};
-
 // Triggers on every database doc change
 const handleDocChange = (doc) => {
     const requiredFields = ['file_path', 'export_lang', 'blocks'];
@@ -60,17 +38,20 @@ const handleDocChange = (doc) => {
     }
 
     // Sends the doc to the compile server...
-    //console.log(COMPILE_ENDPOINT)
-    const handler = handleCompileResponse((err) => { if (err) utils.abort(err); });
-    request.get({uri: COMPILE_ENDPOINT, json: {pd_doc: doc}}, handler);
+    pdAPI.compileFromDoc(doc, handleCompileResponse((err) => {
+        if (err && err.code == 'ENOENT')
+            utils.abort(`Failed to create file at ${file_path}. Are you trying to write to a directory that does not exist?`);
+
+        if (err) utils.abort(err.message);
+    }));
 };
 
 // Watches a doc in Pagedraw and syncs it to the correct file path specified by the doc
 module.exports.syncPagedrawDoc = syncPagedrawDoc = (doc) => {
-    watchDoc(doc.docserver_id, handleDocChange);
+    pdAPI.watchDoc(doc.docserver_id, handleDocChange);
 };
-*/
 
 module.exports.pullPagedrawDoc = pullPagedrawDoc = (doc, callback) => {
     pdAPI.compileFromPageId(doc.id, handleCompileResponse(callback));
 };
+

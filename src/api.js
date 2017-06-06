@@ -5,12 +5,49 @@ var srs = require('secure-random-string');
 var url = require('url');
 var utils = require('./utils');
 var _ = require('lodash');
+var firebase = require('firebase');
 
 const METASERVER = process.env['PAGEDRAW_METASERVER'] || 'https://pagedraw.io/';
 const OAUTH_URL = url.resolve(METASERVER, 'users/auth/google_oauth2');
 const API_VERSION = 'v1'
 const CLI_API_BASE = url.resolve(METASERVER, `api/${API_VERSION}/cli/`);
 const netrc_entry = 'pagedraw.io';
+
+// We currently assume the DOCSERVER is a firebase server
+const DOCSERVER = process.env['PAGEDRAW_DOCSERVER'] || 'https://pagedraw.firebaseio.com/';
+firebase.initializeApp({
+    databaseURL: DOCSERVER
+});
+
+module.exports.onceCLIInfo = onceCLIInfo = (callback) => {
+    // We do a regular GET as opposed to a Firebase once because
+    // the FB once doesn't recognize a timeout i.e. when the user has no internet
+    request.get(url.resolve(DOCSERVER, 'cli_info.json'), (err, resp, body) => {
+        if (err) callback(err);
+        callback(null, JSON.parse(body));
+    });
+};
+
+module.exports.watchCLIInfo = watchCLIInfo = (callback) => {
+    const ref = firebase.database().ref(`cli_info`);
+    const watch_id = ref.on('value', (info) => {
+        callback(info.val());
+    }, (error) => {
+        throw error;
+    });
+    const unsubscribe_fn = () => { ref.off('value', watch_id) };
+    return unsubscribe_fn;
+};
+
+// Watches a doc on Firebase and calls callback on any change
+module.exports.watchDoc = watchDoc = (docserver_id, callback) => {
+    const ref = firebase.database().ref(`pages/${docserver_id}`);
+    const watch_id = ref.on('value', (page) => {
+        callback(JSON.parse(page.val()));
+    });
+    const unsubscribe_fn = () => { ref.off('value', watch_id) };
+    return unsubscribe_fn;
+};
 
 var cachedCredentials = undefined;
 const credentials = () => {
@@ -75,4 +112,9 @@ module.exports.getApp = getApp = (app_name, callback) => {
 
 module.exports.compileFromPageId = compileFromPageId = (page_id, callback) => {
     request.get(authedGet(url.resolve(CLI_API_BASE, `compile_from_page_id/${page_id}`)), callback);
+};
+
+module.exports.compileFromDoc = compileFromDoc = (doc, callback) => {
+    const compile_endpoint = authedGet(url.resolve(CLI_APP_BASE, 'compile_from_doc'));
+    request.get({uri: compile_endpoint, json: {pd_doc: doc}}, callback);
 };
