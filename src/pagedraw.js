@@ -8,7 +8,7 @@ var utils = require('./utils');
 var _ = require('lodash');
 
 program
-  .version('0.0.1')
+  .version(require('../package.json').version)
   .usage('<command>');
 
 program
