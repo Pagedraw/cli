@@ -111,10 +111,21 @@ module.exports.getApp = getApp = (app_name, callback) => {
 };
 
 module.exports.compileFromPageId = compileFromPageId = (page_id, callback) => {
-    request.get(authedGet(url.resolve(CLI_API_BASE, `compile_from_page_id/${page_id}`)), callback);
+    request.get(authedGet(url.resolve(CLI_API_BASE, `compile_from_page_id/${page_id}`)), (err, resp, body) => {
+        if (err) callback(err);
+
+        var json
+        try { json = JSON.parse(body); }
+        catch (err) { return callback(new Error('Pagedraw API returned bad JSON.')); }
+        callback(null, json);
+    });
 };
 
 module.exports.compileFromDoc = compileFromDoc = (doc, callback) => {
-    const compile_endpoint = authedGet(url.resolve(CLI_APP_BASE, 'compile_from_doc'));
-    request.get({uri: compile_endpoint, json: {pd_doc: doc}}, callback);
+    const compile_endpoint = authedGet(url.resolve(CLI_API_BASE, 'compile_from_doc'));
+    request.get({uri: compile_endpoint, json: {pd_doc: doc}}, (err, resp, body) => {
+        if (err) callback(err);
+        // Because of request.get json:, body is already a JSON object
+        callback(null, body);
+    });
 };

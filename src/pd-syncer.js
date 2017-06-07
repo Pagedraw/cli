@@ -1,57 +1,63 @@
-var request = require('request');
 var pdAPI = require('./api');
 var fs = require('fs');
 var url = require('url');
 var utils = require('./utils');
 var _ = require('lodash');
 
-const handleCompileResponse = (callback) => { return (err, resp, body) => {
-    if (err || resp.statusCode != 200)
-        utils.abort('Error. Compile server did not respond correctly.');
-
-    var json;
-    try { json = JSON.parse(body); }
-    catch (err) { throw new Error('Pagedraw API returned bad JSON.'); }
+const handleCompileResponse = (doc) => { return (err, json) => {
+    if (err) {
+        console.error(`[${doc.url}] Error compiling doc. ${err.message}`);
+        return;
+    }
 
     if (_.isEmpty(json.file_path)) {
-        console.log('Not syncing doc. file_path not specified');
+        console.warn(`[${doc.url}] Not syncing. file_path not specified.`);
         return;
     }
 
     // ... and gets back the compiled code, writing it to the
     // file specified by file_path
     fs.writeFile(json.file_path, json.code, (err) => {
-        if (err) return callback(err, json.code, json.file_path);
-        console.log(`Doc synced at path ${json.file_path}`);
-        callback(null, json.code, json.file_path);
+        if (err && err.code == 'ENOENT') {
+            console.error(`[${doc.url}] Failed to create file at ${json.file_path}. Are you trying to write to a directory that does not exist?`);
+            return;
+        }
+
+        if (err) utils.abort(err.message);
+        console.log(`[${doc.url}] Synced at path ${json.file_path}`);
     });
 }};
 
 // Triggers on every database doc change
-const handleDocChange = (doc) => {
+const handleDocChange = (metaserverDoc) => { return (firebaseDoc) => {
+    if (_.isEmpty(firebaseDoc)) {
+        console.error(`[${metaserverDoc.url}] Not syncing. Unable to fetch doc from server.`);
+        return;
+    }
+
     const requiredFields = ['file_path', 'export_lang', 'blocks'];
     for (var field of requiredFields) {
-        if (_.isEmpty(doc[field])) {
-            console.log(`Doc not synced. No ${field} field present.`);
+        if (_.isEmpty(firebaseDoc[field])) {
+            console.warn(`[${metaserverDoc.url}] Not syncing. No ${field} field present.`);
             return;
         }
     }
 
     // Sends the doc to the compile server...
-    pdAPI.compileFromDoc(doc, handleCompileResponse((err) => {
-        if (err && err.code == 'ENOENT')
-            utils.abort(`Failed to create file at ${file_path}. Are you trying to write to a directory that does not exist?`);
-
-        if (err) utils.abort(err.message);
-    }));
-};
+    pdAPI.compileFromDoc(doc, handleCompileResponse(metaserverDoc));
+}};
 
 // Watches a doc in Pagedraw and syncs it to the correct file path specified by the doc
 module.exports.syncPagedrawDoc = syncPagedrawDoc = (doc) => {
-    pdAPI.watchDoc(doc.docserver_id, handleDocChange);
+    if (doc.docserver != 'firebase' || _.isEmpty(doc.docserver_id)) {
+        console.error(`[${doc.url}] Not syncing. Not a Firebase doc.`);
+        return;
+    }
+
+    pdAPI.watchDoc(doc.docserver_id, handleDocChange(doc));
 };
 
-module.exports.pullPagedrawDoc = pullPagedrawDoc = (doc, callback) => {
-    pdAPI.compileFromPageId(doc.id, handleCompileResponse(callback));
+module.exports.pullPagedrawDoc = pullPagedrawDoc = (doc) => {
+    pdAPI.compileFromPageId(doc.id, handleCompileResponse(doc));
 };
 

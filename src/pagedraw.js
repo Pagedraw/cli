@@ -41,29 +41,20 @@ program
 
             // Read all docs to be synced from the config file and pull changes from all of them
             pdAPI.getApp(pd_config.app, (err, resp, body) => {
+                if (err)
+                    utils.abort('Unable to fetch data from the Pagedraw API. Are you connected to the internet?');
+
                 if (resp.statusCode == 404)
                     utils.abort(`Unable to fetch data from Pagedraw API. Are you sure you have access to the app ${pd_config.app}? Try running pagedraw login`);
-
-                if (err || resp.statusCode != 200)
-                    utils.abort('Unable to fetch data from the Pagedraw API. Are you connected to the internet?');
 
                 var app;
                 try { app = JSON.parse(body); }
                 catch (err) { throw new Error('Pagedraw API returned bad JSON.'); }
 
-                console.log(`Pulling docs from app ${app.name}`);
+                console.log(`Pulling docs from app ${app.name}...\n`);
                 let docs = app.pages;
                 docs.forEach((doc) => {
-                    console.log(`Pulling doc ${doc.url}`);
-                    pdSyncer.pullPagedrawDoc(doc, (err, code, file_path) => {
-                        if (err && err.code == 'ENOENT')
-                            utils.abort(`Failed to create file at ${file_path}. Are you trying to write to a directory that does not exist?`);
-
-                        if (err) utils.abort(err.message);
-
-                        // all docs pulled and written to disk
-                        console.log('All done')
-                    });
+                    pdSyncer.pullPagedrawDoc(doc);
                 });
             });
         });
@@ -95,10 +86,9 @@ program
                 try { app = JSON.parse(body); }
                 catch (err) { throw new Error('Pagedraw API returned bad JSON.'); }
 
-                console.log(`Pulling docs from app ${app.name}`);
+                console.log(`Syncing docs from app ${app.name}\n`);
                 let docs = app.pages;
                 docs.forEach((doc) => {
-                    console.log(`Starting to sync doc ${doc.url}`);
                     pdSyncer.syncPagedrawDoc(doc);
                 });
             });
@@ -120,7 +110,7 @@ const checkPackageInfo = (info) => {
         utils.abort(`Your Pagedraw CLI is out of date. Please run\n\tnpm install -g ${info.name}@${info.version}`);
 };
 
-if (process.env['ENVIRONMNET'] == 'development') {
+if (process.env['ENVIRONMENT'] == 'development') {
     // For development we don't wanna be constrained by a version forced by the API
     program.parse(process.argv);
 } else {
