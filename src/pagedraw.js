@@ -9,6 +9,15 @@ var _ = require('lodash');
 
 var pkgJson = require('../package.json')
 
+const checkPackageInfo = (info) => {
+    if (_.isEmpty(info))
+        utils.abort('Unable to fetch CLI info from server. Please report this error.');
+
+    if (info.version != pkgJson.version || info.name != pkgJson.name)
+        utils.abort(`Your Pagedraw CLI is out of date. Please run\n\tnpm install -g ${info.name}@${info.version}`);
+};
+
+
 program
   .version(pkgJson.version)
   .usage('<command>');
@@ -64,6 +73,13 @@ program
     .command('sync')
     .description('Compile remote Pagedraw docs and continuously sync them into your local file system, in the path specified by each doc\'s file_path.')
     .action(function(env, options) {
+        // listen to changes in the CLI info, aborting if the version
+        // changes while we are syncing
+        // FIXME: Right now this is done only in sync. Maybe we should do it across
+        // the board and make sure every action unsubscribes or explicitly exits
+        // after it's done
+        pdAPI.watchCLIInfo(checkPackageInfo);
+
         pdConfig.findPagedrawConfig((err, dir, pd_config) => {
             if (err)
                 utils.abort(err.message);
@@ -105,17 +121,12 @@ program
 if (process.argv.length <= 2)
     program.help();
 
-const checkPackageInfo = (info) => {
-    if (info.version != pkgJson.version || info.name != pkgJson.name)
-        utils.abort(`Your Pagedraw CLI is out of date. Please run\n\tnpm install -g ${info.name}@${info.version}`);
-};
-
 if (process.env['ENVIRONMENT'] == 'development') {
     // For development we don't wanna be constrained by a version forced by the API
     program.parse(process.argv);
 } else {
     // But in prod we ensure the CLI package version and name are up to date
-    // before proceeding...
+    // before proceeding
     pdAPI.onceCLIInfo((err, info) => {
         if (err && err.code == 'ENOTFOUND')
             utils.abort('Unable to verify that the Pagedraw CLI is up to date. Are you connected to the internet?');
@@ -123,10 +134,6 @@ if (process.env['ENVIRONMENT'] == 'development') {
             throw err;
 
         checkPackageInfo(info);
-
-        // ... and we also listen to changes in the CLI info, aborting if the version
-        // changes while we are in the middle of command
-        pdAPI.watchCLIInfo(checkPackageInfo);
 
         // Start the Pagedraw CLI
         program.parse(process.argv);

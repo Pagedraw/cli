@@ -44,7 +44,7 @@ const handleDocChange = (metaserverDoc) => { return (firebaseDoc) => {
     }
 
     // Sends the doc to the compile server...
-    pdAPI.compileFromDoc(doc, handleCompileResponse(metaserverDoc));
+    pdAPI.compileFromDoc(firebaseDoc, handleCompileResponse(metaserverDoc));
 }};
 
 // Watches a doc in Pagedraw and syncs it to the correct file path specified by the doc
