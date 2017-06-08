@@ -3,7 +3,7 @@ var path = require('path');
 var findup = require('findup');
 
 module.exports.findPagedrawConfig = findPagedrawConfig = (callback) => {
-    findup(__dirname, 'pagedraw.json', function(err, dir) {
+    findup(process.cwd(), 'pagedraw.json', function(err, dir) {
         if (err)
             return callback(new Error('Unable to find pagedraw.json in ancestor directories.'));
 
