@@ -1,6 +1,6 @@
 {
   "name": "pagedraw-cli",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Pagedraw command line tool",
   "main": "src/pagedraw.js",
   "repository": "https://github.com/Pagedraw/cli",
