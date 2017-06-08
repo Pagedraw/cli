@@ -8,7 +8,6 @@ var _ = require('lodash');
 var firebase = require('firebase');
 
 const METASERVER = process.env['PAGEDRAW_METASERVER'] || 'https://pagedraw.io/';
-const OAUTH_URL = url.resolve(METASERVER, 'users/auth/google_oauth2');
 const API_VERSION = 'v1'
 const CLI_API_BASE = url.resolve(METASERVER, `api/${API_VERSION}/cli/`);
 const netrc_entry = 'pagedraw.io';
@@ -82,7 +81,7 @@ module.exports.pagedrawAPIAuthenticate = (callback) => {
 
     // Open browser passing it the local token, asking user to authenticate
     // Upon authentication, server will associate an auth_token to our local_token
-    const signin_url = url.resolve(METASERVER, `users/auth/google_oauth2?local_token=${local_token}`);
+    const signin_url = url.resolve(CLI_API_BASE, `authenticate/${local_token}`);
     open(signin_url);
 
     console.log('Your browser has been open to visit:');
@@ -90,8 +89,8 @@ module.exports.pagedrawAPIAuthenticate = (callback) => {
     console.log('Waiting for authentication...');
 
     // Poll metaserver for the auth_token associated with local_token
-    const auth_endpoint = url.resolve(CLI_API_BASE, 'authenticate');
-    watchPage(`${auth_endpoint}?local_token=${local_token}`, (body) => {
+    const get_auth_token_url = url.resolve(CLI_API_BASE, `get_auth_token/${local_token}`);
+    watchPage(get_auth_token_url, (body) => {
         // Write the auth_token to ~/.netrc
         var myNetrc = netrc();
         myNetrc[netrc_entry] = { login: body.email, password: body.auth_token };
