@@ -19,3 +19,10 @@ To publish run
 npm publish```
 
 and don't forget to update the version in firebase's `cli_info`
+
+# Development
+
+To run in development mode do
+
+```yarn dev```
+

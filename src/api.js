@@ -10,7 +10,7 @@ var firebase = require('firebase');
 const METASERVER = process.env['PAGEDRAW_METASERVER'] || 'https://pagedraw.io/';
 const API_VERSION = 'v1'
 const CLI_API_BASE = url.resolve(METASERVER, `api/${API_VERSION}/cli/`);
-const netrc_entry = 'pagedraw.io';
+const netrc_entry = process.env['NETRC_ENTRY'] || 'pagedraw.io';
 
 // We currently assume the DOCSERVER is a firebase server
 const DOCSERVER = process.env['PAGEDRAW_DOCSERVER'] || 'https://pagedraw.firebaseio.com/';

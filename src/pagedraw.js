@@ -142,6 +142,8 @@ program
         program.outputHelp();
     });
 
+log('Pagedraw CLI starting')
+
 program.parse(process.argv);
 
 // If user doesn't pass any arguments after the program name, just show help
