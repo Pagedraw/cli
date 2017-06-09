@@ -15,8 +15,10 @@ Now the `pagedraw` command should be available in your terminal. To test it type
 
 To publish run
 
-```npm version patch|minor|major
-npm publish```
+```
+npm version patch|minor|major
+npm publish
+```
 
 and don't forget to update the version in firebase's `cli_info`
 
