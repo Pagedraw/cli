@@ -1,26 +1,40 @@
 {
   "name": "pagedraw-cli",
-  "version": "0.0.6",
+  "version": "0.3.1",
   "description": "Pagedraw command line tool",
-  "main": "src/pagedraw.js",
-  "repository": "https://github.com/Pagedraw/cli",
   "bin": {
-    "pagedraw": "src/pagedraw.js"
+    "pagedraw": "artifacts/pagedraw.js"
   },
+  "repository": "https://github.com/Pagedraw/cli",
   "dependencies": {
+    "cli-color": "1.2.0",
+    "cli-clear": "1.0.4",
     "commander": "2.9.0",
-    "firebase": "4.0.0",
+    "dotenv": "4.0.0",
+    "filendir": "1.0.0",
     "findup": "0.1.5",
+    "firebase": "4.0.0",
     "lodash": "4.17.4",
     "netrc": "0.1.4",
     "open": "0.0.5",
     "request": "2.61.0",
     "secure-random-string": "1.0.0"
   },
+  "devDependencies": {
+    "@types/commander": "2.9.1",
+    "@types/lodash": "4.14.66",
+    "@types/node": "8.0.1",
+    "typescript": "2.3.4"
+  },
   "scripts": {
-      "dev": "ENVIRONMENT=development PAGEDRAW_METASERVER=http://localhost:4000 NETRC_ENTRY=pagedraw.localhost src/pagedraw.js"
-
+    "compile": "tsc && echo '#!/usr/bin/env node' | cat - artifacts/pagedraw.js > temp && mv temp artifacts/pagedraw.js && chmod a+x artifacts/pagedraw.js",
+    "prepublish": "yarn compile",
+    "pagedraw": "yarn compile && artifacts/pagedraw.js",
+    "clean": "rm artifacts/*",
+    "dev": "yarn compile && ENVIRONMENT=development PAGEDRAW_DOCSERVER=https://pagedraw-1226.firebaseio.com PAGEDRAW_COMPILESERVER=http://localhost:5000 PAGEDRAW_METASERVER=http://localhost:4000 NETRC_ENTRY=pagedraw.localhost artifacts/pagedraw.js",
+    "init-dev": "cp .env.dev .env"
   },
   "author": "Pagedraw",
-  "license": "ISC"
+  "license": "ISC",
+  "typings": "artifacts/pagedraw.d.ts"
 }
