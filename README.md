@@ -5,7 +5,7 @@
 ## Setup
 
 To install the PageDraw CLI tool, use NPM:
-```npm install -g pagedraw```
+```npm install -g pagedraw-cli```
 
 ### Usage
 
