@@ -4,45 +4,8 @@
 
 ## Setup
 
-To install the PageDraw CLI tool, use NPM:
-```npm install -g pagedraw-cli```
+To install the Pagedraw CLI, follow these instructions: https://documentation.pagedraw.io/install/
 
 ### Usage
 
-Now the `pagedraw` command should be available in your terminal. To test it type
-
-```pagedraw login```
-
-## Development
-
-To setup your environment for local development:
-```
-yarn run init-dev
-```
-
-To run the app:
-```
-yarn run pagedraw
-```
-e.g.:
-```
-yarn run pagedraw login
-yarn run pagedraw pull
-...
-```
-
-To remove artifacts:
-```
-yarn run clean
-```
-
-## Publishing
-
-To publish run
-
-```
-npm version patch|minor|major
-npm publish
-```
-
-**Don't forget to update the version in firebase's `cli_info`**
+See https://documentation.pagedraw.io/cli/
